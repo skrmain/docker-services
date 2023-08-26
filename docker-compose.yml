@@ -1,0 +1,171 @@
+services:
+    rabbitmq:
+        container_name: rabbitmq
+        image: rabbitmq:3.10-management-alpine
+        environment:
+            - RABBITMQ_DEFAULT_USER=admin
+            - RABBITMQ_DEFAULT_PASS=admin
+        # volumes:
+        #     - ./services/rabbitmq:/etc/rabbitmq/
+        ports:
+            - 5672:5672 # AMQP protocol port
+            - 15672:15672 # HTTP management UI
+
+    postgres:
+        image: postgres:alpine
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: root
+
+    mysql:
+        image: mysql
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        ports:
+            - 3306:3306
+        volumes:
+            - ./docker-data/mysql_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: admin
+    mysql_v8:
+        image: mysql:8.0
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        ports:
+            - 3306:3306
+        volumes:
+            - ./docker-data/mysql_v8_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: admin
+
+    redis:
+        image: redis
+        restart: always
+        ports:
+            - 6379:6379
+        volumes:
+            - ./docker-data/redis_data:/data
+
+    mongo:
+        image: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mongo_data:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: admin
+    mongo_v4:
+        image: mongo:4.4.0
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mongo_v4_data:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: admin
+    mongo_v5:
+        image: mongo:5.0.3
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mongo_v5_data:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: admin
+
+    # For MongoDb Replic Set
+    mdb1:
+        image: mongo:5.0.3
+        container_name: MongoDB-1
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mdb1:/data/db/
+            - ./rs-init.sh:/scripts/rs-init.sh
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: admin
+        links:
+            - mdb2
+            - mdb3
+        entrypoint:
+            [
+                "/usr/bin/mongod",
+                "--bind_ip_all",
+                "--replSet",
+                "dbrs"
+            ]
+    mdb2:
+        image: mongo:5.0.3
+        container_name: MongoDB-2
+        restart: always
+        ports:
+            - 27018:27017
+        volumes:
+            - ./docker-data/mdb2:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: admin
+        entrypoint:
+            [
+                "/usr/bin/mongod",
+                "--bind_ip_all",
+                "--replSet",
+                "dbrs"
+            ]
+    mdb3:
+        image: mongo:5.0.3
+        container_name: MongoDB-3
+        restart: always
+        ports:
+            - 27019:27017
+        volumes:
+            - ./docker-data/mdb3:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: admin
+        entrypoint:
+            [
+                "/usr/bin/mongod",
+                "--bind_ip_all",
+                "--replSet",
+                "dbrs"
+            ]
+
+    dynamodb:
+        container_name: dynamodb
+        image: 'amazon/dynamodb-local:latest'
+        command: '-jar DynamoDBLocal.jar -sharedDb -dbPath ./data'
+        ports:
+            - '8000:8000'
+        volumes:
+            - './docker-data/dynamodb_data:/home/dynamodb_data/data'
+        working_dir: /home/dynamodb_data
+
+    nginx:
+        image: nginx:alpine
+        volumes:
+            - ./services/nginx/:/etc/nginx/conf.d/
+        network_mode: "host"
+        # ports:
+        #     - "8080:80"
+
+
+    #     server:
+    #         build:
+    #             context: ./server/
+    #             dockerfile: Dockerfile
+    #         volumes:
+    #             - ./server/src:/app/src
+    #         ports:
+    #             - 8000:8000
+    #         environment:
+    #             - QUEUE_URL
+    #             - QUEUE
+    #         depends_on:
+    #             - rabbitmq
