@@ -93,13 +93,7 @@ services:
         links:
             - mdb2
             - mdb3
-        entrypoint:
-            [
-                "/usr/bin/mongod",
-                "--bind_ip_all",
-                "--replSet",
-                "dbrs"
-            ]
+        entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
     mdb2:
         image: mongo:5.0.3
         container_name: MongoDB-2
@@ -111,13 +105,7 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: admin
             MONGO_INITDB_ROOT_PASSWORD: admin
-        entrypoint:
-            [
-                "/usr/bin/mongod",
-                "--bind_ip_all",
-                "--replSet",
-                "dbrs"
-            ]
+        entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
     mdb3:
         image: mongo:5.0.3
         container_name: MongoDB-3
@@ -129,13 +117,7 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: admin
             MONGO_INITDB_ROOT_PASSWORD: admin
-        entrypoint:
-            [
-                "/usr/bin/mongod",
-                "--bind_ip_all",
-                "--replSet",
-                "dbrs"
-            ]
+        entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
 
     dynamodb:
         container_name: dynamodb
@@ -151,10 +133,15 @@ services:
         image: nginx:alpine
         volumes:
             - ./services/nginx/:/etc/nginx/conf.d/
-        network_mode: "host"
+        network_mode: 'host'
         # ports:
         #     - "8080:80"
 
+    play-bun:
+        image: oven/bun:alpine
+        command: tail -F anything
+        volumes:
+            - ${SOURCE_CODE}:/home/bun/app
 
     #     server:
     #         build:
