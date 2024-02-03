@@ -27,16 +27,6 @@ services:
             - ./docker-data/mysql_data:/var/lib/mysql
         environment:
             MYSQL_ROOT_PASSWORD: admin
-    mysql_v8:
-        image: mysql:8.0
-        command: --default-authentication-plugin=mysql_native_password
-        restart: always
-        ports:
-            - 3306:3306
-        volumes:
-            - ./docker-data/mysql_v8_data:/var/lib/mysql
-        environment:
-            MYSQL_ROOT_PASSWORD: admin
 
     redis:
         image: redis
@@ -53,26 +43,6 @@ services:
             - 27017:27017
         volumes:
             - ./docker-data/mongo_data:/data/db/
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: admin
-            MONGO_INITDB_ROOT_PASSWORD: admin
-    mongo_v4:
-        image: mongo:4.4.0
-        restart: always
-        ports:
-            - 27017:27017
-        volumes:
-            - ./docker-data/mongo_v4_data:/data/db/
-        environment:
-            MONGO_INITDB_ROOT_USERNAME: admin
-            MONGO_INITDB_ROOT_PASSWORD: admin
-    mongo_v5:
-        image: mongo:5.0.3
-        restart: always
-        ports:
-            - 27017:27017
-        volumes:
-            - ./docker-data/mongo_v5_data:/data/db/
         environment:
             MONGO_INITDB_ROOT_USERNAME: admin
             MONGO_INITDB_ROOT_PASSWORD: admin
@@ -142,17 +112,3 @@ services:
         command: tail -F anything
         volumes:
             - ${SOURCE_CODE}:/home/bun/app
-
-    #     server:
-    #         build:
-    #             context: ./server/
-    #             dockerfile: Dockerfile
-    #         volumes:
-    #             - ./server/src:/app/src
-    #         ports:
-    #             - 8000:8000
-    #         environment:
-    #             - QUEUE_URL
-    #             - QUEUE
-    #         depends_on:
-    #             - rabbitmq
