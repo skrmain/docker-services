@@ -107,8 +107,16 @@ services:
         # ports:
         #     - "8080:80"
 
-    play-bun:
-        image: oven/bun:alpine
-        command: tail -F anything
-        volumes:
-            - ${SOURCE_CODE}:/home/bun/app
+    # play-bun:
+    #     image: oven/bun:alpine
+    #     command: tail -F anything
+    #     volumes:
+    #         - ${SOURCE_CODE}:/home/bun/app
+
+    redis:
+        image: redis:latest
+        # container_name: redis-server
+        # restart: always
+        command: ["redis-server", "--requirepass", "admin"]
+        ports:
+        - "6379:6379"
