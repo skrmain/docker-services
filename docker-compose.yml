@@ -29,12 +29,14 @@ services:
             MYSQL_ROOT_PASSWORD: admin
 
     redis:
-        image: redis
-        restart: always
+        image: redis:latest
+        # container_name: redis-server
+        # restart: always
+        command: ['redis-server', '--requirepass', 'admin']
         ports:
             - 6379:6379
-        volumes:
-            - ./docker-data/redis_data:/data
+        # volumes:
+        #     - ./docker-data/redis_data:/data
 
     mongo:
         image: mongo
@@ -112,11 +114,3 @@ services:
     #     command: tail -F anything
     #     volumes:
     #         - ${SOURCE_CODE}:/home/bun/app
-
-    redis:
-        image: redis:latest
-        # container_name: redis-server
-        # restart: always
-        command: ["redis-server", "--requirepass", "admin"]
-        ports:
-        - "6379:6379"
