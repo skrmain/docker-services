@@ -3,8 +3,8 @@ services:
         container_name: rabbitmq
         image: rabbitmq:3.10-management-alpine
         environment:
-            - RABBITMQ_DEFAULT_USER=admin
-            - RABBITMQ_DEFAULT_PASS=admin
+            - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+            - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
         # volumes:
         #     - ./services/rabbitmq:/etc/rabbitmq/
         ports:
@@ -12,10 +12,28 @@ services:
             - 15672:15672 # HTTP management UI
 
     postgres:
+        container_name: postgres
         image: postgres:alpine
         restart: always
+        ports:
+            - 5432:5432
         environment:
-            POSTGRES_PASSWORD: root
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+            - ./docker-data/postgres_data:/var/lib/postgresql
+
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: pgadmin
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+        ports:
+            - 5050:80
+        volumes:
+            - ./docker-data/pgadmin_data:/var/lib/pgadmin
 
     mysql:
         image: mysql
@@ -26,13 +44,13 @@ services:
         volumes:
             - ./docker-data/mysql_data:/var/lib/mysql
         environment:
-            MYSQL_ROOT_PASSWORD: admin
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
     redis:
         image: redis:latest
-        # container_name: redis-server
+        container_name: redis
         # restart: always
-        command: ['redis-server', '--requirepass', 'admin']
+        command: ['redis-server', '--requirepass', '${REDIS_PASS}']
         ports:
             - 6379:6379
         # volumes:
@@ -46,10 +64,10 @@ services:
         volumes:
             - ./docker-data/mongo_data:/data/db/
         environment:
-            MONGO_INITDB_ROOT_USERNAME: admin
-            MONGO_INITDB_ROOT_PASSWORD: admin
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
 
-    # For MongoDb Replic Set
+    # For MongoDb Replica Set
     mdb1:
         image: mongo:5.0.3
         container_name: MongoDB-1
@@ -60,8 +78,8 @@ services:
             - ./docker-data/mdb1:/data/db/
             - ./rs-init.sh:/scripts/rs-init.sh
         environment:
-            MONGO_INITDB_ROOT_USERNAME: admin
-            MONGO_INITDB_ROOT_PASSWORD: admin
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
         links:
             - mdb2
             - mdb3
@@ -75,8 +93,8 @@ services:
         volumes:
             - ./docker-data/mdb2:/data/db/
         environment:
-            MONGO_INITDB_ROOT_USERNAME: admin
-            MONGO_INITDB_ROOT_PASSWORD: admin
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
         entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
     mdb3:
         image: mongo:5.0.3
@@ -87,8 +105,8 @@ services:
         volumes:
             - ./docker-data/mdb3:/data/db/
         environment:
-            MONGO_INITDB_ROOT_USERNAME: admin
-            MONGO_INITDB_ROOT_PASSWORD: admin
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
         entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
 
     dynamodb:
@@ -108,9 +126,3 @@ services:
         network_mode: 'host'
         # ports:
         #     - "8080:80"
-
-    # play-bun:
-    #     image: oven/bun:alpine
-    #     command: tail -F anything
-    #     volumes:
-    #         - ${SOURCE_CODE}:/home/bun/app
