@@ -1,0 +1,21 @@
+services:
+    redis_insight:
+        image: redis/redisinsight:latest
+        container_name: redis_insight
+
+        restart: unless-stopped
+
+        ports:
+            - "5540:5540"
+
+        # environment:
+        #     RI_APP_HOST: 0.0.0.0
+        #     RI_APP_PORT: 5540
+
+        #     # Encrypt saved Redis passwords/configs
+        #     RI_ENCRYPTION_KEY: 'change-this-to-a-long-random-secret'
+
+        volumes:
+            - "./docker-data/redis_insight:/data"
+# sudo chown -R 1000:1000 ./docker-data/redis_insight
+# sudo chmod -R 755 ./docker-data/redis_insight

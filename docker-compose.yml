@@ -1,4 +1,22 @@
 services:
+    dbeaver:
+        image: dbeaver/cloudbeaver:latest
+        container_name: dbeaver
+        restart: unless-stopped
+
+        ports:
+            - "8978:8978"
+
+        environment:
+            # Initial admin credentials
+            - CB_ADMIN_NAME=${CB_ADMIN_NAME}
+            - CB_ADMIN_PASSWORD=${CB_ADMIN_PASSWORD}
+
+            # Optional: disable anonymous access
+            - CB_SERVER_NAME=${CB_SERVER_NAME}
+        volumes:
+            - ./docker-data/cloudbeaver_data:/opt/cloudbeaver/workspace
+
     rabbitmq:
         container_name: rabbitmq
         image: rabbitmq:3.10-management-alpine
@@ -50,7 +68,7 @@ services:
         image: redis:latest
         container_name: redis
         # restart: always
-        command: ['redis-server', '--requirepass', '${REDIS_PASS}']
+        command: ["redis-server", "--requirepass", "${REDIS_PASS}"]
         ports:
             - 6379:6379
         # volumes:
@@ -63,6 +81,17 @@ services:
             - 27017:27017
         volumes:
             - ./docker-data/mongo_data:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+
+    mongo_v7:
+        image: mongo:7.0.22
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mongo_v7:/data/db/
         environment:
             MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
             MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -83,7 +112,7 @@ services:
         links:
             - mdb2
             - mdb3
-        entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
+        entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs"]
     mdb2:
         image: mongo:5.0.3
         container_name: MongoDB-2
@@ -95,7 +124,7 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
             MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-        entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
+        entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs"]
     mdb3:
         image: mongo:5.0.3
         container_name: MongoDB-3
@@ -107,22 +136,22 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
             MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-        entrypoint: ['/usr/bin/mongod', '--bind_ip_all', '--replSet', 'dbrs']
+        entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs"]
 
     dynamodb:
         container_name: dynamodb
-        image: 'amazon/dynamodb-local:latest'
-        command: '-jar DynamoDBLocal.jar -sharedDb -dbPath ./data'
+        image: "amazon/dynamodb-local:latest"
+        command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
         ports:
-            - '8000:8000'
+            - "8000:8000"
         volumes:
-            - './docker-data/dynamodb_data:/home/dynamodb_data/data'
+            - "./docker-data/dynamodb_data:/home/dynamodb_data/data"
         working_dir: /home/dynamodb_data
 
     nginx:
         image: nginx:alpine
         volumes:
             - ./services/nginx/:/etc/nginx/conf.d/
-        network_mode: 'host'
+        network_mode: "host"
         # ports:
         #     - "8080:80"
