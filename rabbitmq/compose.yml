@@ -1,0 +1,12 @@
+services:
+    rabbitmq:
+        container_name: rabbitmq
+        image: rabbitmq:3.10-management-alpine
+        environment:
+            - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+            - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+        # volumes:
+        #     - ./config:/etc/rabbitmq/
+        ports:
+            - 5672:5672 # AMQP protocol port
+            - 15672:15672 # HTTP management UI

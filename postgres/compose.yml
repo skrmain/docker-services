@@ -1,0 +1,52 @@
+services:
+    postgres:
+        container_name: postgres
+        image: postgres:alpine
+        restart: always
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+            - postgres_data:/var/lib/postgresql
+
+    # postgresql-ui
+    adminer:
+        container_name: adminer
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080
+
+    # dbeaver:
+    #     image: dbeaver/cloudbeaver:latest
+    #     container_name: dbeaver
+    #     restart: unless-stopped
+    #     ports:
+    #         - "8978:8978"
+    #     environment:
+    #         # Initial admin credentials
+    #         - CB_ADMIN_NAME=${CB_ADMIN_NAME}
+    #         - CB_ADMIN_PASSWORD=${CB_ADMIN_PASSWORD}
+    #         # Optional: disable anonymous access
+    #         - CB_SERVER_NAME=${CB_SERVER_NAME}
+    #     volumes:
+    #         - cloudbeaver_data:/opt/cloudbeaver/workspace
+
+    # pgadmin:
+    #     image: dpage/pgadmin4:latest
+    #     container_name: pgadmin
+    #     restart: always
+    #     environment:
+    #         PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+    #         PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    #     ports:
+    #         - 5050:80
+    #     volumes:
+    #         - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+    postgres_data:
+    # pgadmin_data:
+    # cloudbeaver_data:

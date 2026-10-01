@@ -1,0 +1,92 @@
+services:
+    mongo-rs-1:
+        image: mongo:7.0.22
+        container_name: mongo-single-rs
+        restart: always
+        ports:
+            - "27017:27017"
+        command: >
+            bash -c "
+              mongod --replSet rs0 --bind_ip_all &
+              sleep 5 &&
+              mongosh --eval '
+                try {
+                  rs.initiate({
+                    _id: \"rs0\",
+                    members: [{ _id: 0, host: \"localhost:27017\" }]
+                  })
+                } catch (e) {
+                  print(e)
+                }
+              ' &&
+              wait
+            "
+        volumes:
+            - ./docker-data/mongo_data:/data/db/
+        # environment:
+        #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+        #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+
+    mongo:
+        image: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mongo_data:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+
+    mongo_v7:
+        image: mongo:7.0.22
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mongo_v7:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+
+    # For MongoDb Replica Set
+    mdb1:
+        image: mongo:5.0.3
+        container_name: MongoDB-1
+        restart: always
+        ports:
+            - 27017:27017
+        volumes:
+            - ./docker-data/mdb1:/data/db/
+            - ./rs-init.sh:/scripts/rs-init.sh
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+        links:
+            - mdb2
+            - mdb3
+        entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs"]
+    mdb2:
+        image: mongo:5.0.3
+        container_name: MongoDB-2
+        restart: always
+        ports:
+            - 27018:27017
+        volumes:
+            - ./docker-data/mdb2:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+        entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs"]
+    mdb3:
+        image: mongo:5.0.3
+        container_name: MongoDB-3
+        restart: always
+        ports:
+            - 27019:27017
+        volumes:
+            - ./docker-data/mdb3:/data/db/
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+        entrypoint: ["/usr/bin/mongod", "--bind_ip_all", "--replSet", "dbrs"]
